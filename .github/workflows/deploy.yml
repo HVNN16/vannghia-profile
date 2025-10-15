@@ -1,0 +1,45 @@
+name: CI/CD Portfolio
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: 🏗️ Build & Push backend
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USER }}/portfolio-backend:latest ./backend
+          docker push ${{ secrets.DOCKERHUB_USER }}/portfolio-backend:latest
+
+      - name: 🏗️ Build & Push frontend
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest
+
+      - name: 🚀 Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/vannghia-portfolio
+            docker pull ${{ secrets.DOCKERHUB_USER }}/portfolio-backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest
+            docker-compose down
+            docker-compose up -d
