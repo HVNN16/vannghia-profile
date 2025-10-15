@@ -6,10 +6,16 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [popup, setPopup] = useState({ visible: false, success: true });
 
+  // ✅ Hàm gửi form
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/api/contact", form);
+      // Gửi đến backend — dùng biến môi trường nếu có
+      const apiUrl = process.env.REACT_APP_API_URL
+        ? `${process.env.REACT_APP_API_URL}/api/contact`
+        : "http://localhost:8080/api/contact";
+
+      await axios.post(apiUrl, form);
       setPopup({ visible: true, success: true });
       setForm({ name: "", email: "", message: "" });
     } catch (err) {

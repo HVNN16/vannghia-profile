@@ -5,9 +5,13 @@ import { motion } from "framer-motion";
 export default function Projects() {
   const [projects, setProjects] = useState([]);
 
+  // ✅ Ưu tiên REACT_APP_API_URL nếu có, ngược lại dùng localhost (khi chạy dev)
+  const API_BASE =
+    process.env.REACT_APP_API_URL || "http://localhost:8080";
+
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/projects")
+      .get(`${API_BASE}/api/projects`)
       .then((res) => setProjects(res.data))
       .catch((err) => console.error("❌ Error loading projects:", err));
   }, []);
@@ -28,7 +32,10 @@ export default function Projects() {
               className="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition"
             >
               <img
-                src={p.image || "https://via.placeholder.com/300x200?text=No+Image"}
+                src={
+                  p.image ||
+                  "https://images.unsplash.com/photo-1581092334531-3e09a4bb7a8b?auto=format&fit=crop&w=800&q=80"
+                }
                 alt={p.title}
                 className="rounded-md mb-4 w-full h-48 object-cover"
               />
