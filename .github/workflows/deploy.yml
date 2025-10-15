@@ -1,11 +1,11 @@
-name: CI/CD Portfolio
+name: CI/CD Portfolio (Docker Hub Only)
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,16 +30,3 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest ./frontend
           docker push ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest
-
-      - name: 🚀 Deploy to AWS EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~/vannghia-portfolio
-            docker pull ${{ secrets.DOCKERHUB_USER }}/portfolio-backend:latest
-            docker pull ${{ secrets.DOCKERHUB_USER }}/portfolio-frontend:latest
-            docker-compose down
-            docker-compose up -d
